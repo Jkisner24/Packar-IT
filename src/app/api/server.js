@@ -30,7 +30,7 @@ async function obtenerUserIdDeInicoSesion(socket) {
 
 const io = new Server(httpServer, {
   cors: {
-    origin: ["https://packar-it.vercel.app" || "http://localhost:3000"],
+    origin: "https://packar-it-9i79.vercel.app",
     methods: ["GET", "POST"],
   },
 });
