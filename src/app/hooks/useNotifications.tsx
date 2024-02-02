@@ -45,7 +45,7 @@ const useNotifications = (): NotificationsHook => {
 
       // Hacer una solicitud a tu API para obtener la información del usuario
       try {
-        const response = await fetch(`/api/auth/myid/${userMail}`);
+        const response = await fetch(`/api/auth/myid/?email=${userMail}`);
         const userData = await response.json();
 
         // userData ahora contiene la información del usuario
@@ -53,7 +53,7 @@ const useNotifications = (): NotificationsHook => {
 
         // Emitir el evento "session" con la información del usuario
         socket.emit("session", { session, userInfo: userData });
-        
+
       } catch (error) {
         console.error("Error al obtener la información del usuario desde la API:", error);
       }
