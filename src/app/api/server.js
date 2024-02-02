@@ -41,7 +41,7 @@ io.on("connection", async (socket) => {
   );
 
   // Accede a la información del usuario proporcionada al conectarse.
-  const userInfo = await obtenerUserIdDeInicoSesion(socket);
+  const userInfo = socket.userInfo;
 
   if (userInfo) {
     const { userId, fullname, email } = userInfo;

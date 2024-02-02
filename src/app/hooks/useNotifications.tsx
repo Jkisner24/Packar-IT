@@ -30,9 +30,7 @@ const useNotifications = (): NotificationsHook => {
   const socket: Socket = io(socketServerUrl);
 
   const [receivedMessages, setReceivedMessages] = useState<Message[]>([]);
-  const [receivedNotifications, setReceivedNotifications] = useState<
-    NotificationData[]
-  >([]);
+  const [receivedNotifications, setReceivedNotifications] = useState<NotificationData[]>([]);
 
   useEffect(() => {
     const initializeSocket = async () => {
@@ -43,7 +41,22 @@ const useNotifications = (): NotificationsHook => {
         // Obtener la información de sesión y emitir el evento "session"
         const session = await getSession();
         console.log("Sending session information:", session);
-        socket.emit("session", { session });
+        const userMail = session?.user?.email;
+
+      // Hacer una solicitud a tu API para obtener la información del usuario
+      try {
+        const response = await fetch(`/api/auth/myid/${userMail}`);
+        const userData = await response.json();
+
+        // userData ahora contiene la información del usuario
+        console.log("Información del usuario desde la API:", userData);
+
+        // Emitir el evento "session" con la información del usuario
+        socket.emit("session", { session, userInfo: userData });
+        
+      } catch (error) {
+        console.error("Error al obtener la información del usuario desde la API:", error);
+      }
 
         // Suscribirse a las notificaciones
         subscribeToNotifications((data) => {
