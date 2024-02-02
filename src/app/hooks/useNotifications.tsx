@@ -155,7 +155,7 @@ const useNotifications = (): NotificationsHook => {
       );
 
       console.log("Información del usuario desde la API:", userData);
-      alert(`Información del usuario desde la API: ${JSON.stringify(userData)}`);
+      alert(`Hay una notificación de ${JSON.stringify(userData.fullname)}`);
 
       socket.emit("session", { session, userInfo: userData });
     } catch (error) {
