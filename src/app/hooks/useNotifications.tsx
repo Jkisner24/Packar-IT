@@ -40,7 +40,7 @@ const useNotifications = (): NotificationsHook => {
 
         // Obtener la información de sesión y emitir el evento "session"
         const session = await getSession();
-        console.log("Sending session information:", session);
+        console.log("Información de sesión:", session);
         const userMail = session?.user?.email;
 
       // Hacer una solicitud a tu API para obtener la información del usuario
