@@ -39,24 +39,6 @@ const useNotifications = (): NotificationsHook => {
       socket.on("connect", async () => {
         console.log("Conectado al servidor de sockets");
 
-        // Obtener la información de sesión y emitir el evento "session"
-        const session = await getSession();
-        console.log("Información de sesión:", session);
-        const userMail = session?.user?.email;
-
-      // Hacer una solicitud a tu API para obtener la información del usuario
-      try {
-        const response = await fetch(`/api/auth/myid/?email=${userMail}`);
-        console.log("Respuesta de la API:", response);
-        const userData = await response.json();
-        console.log("Información del usuario desde la API:", userData);
-
-        // Emitir el evento "session" con la información del usuario
-        socket.emit("session", { session, userInfo: userData });
-
-      } catch (error) {
-        console.error("Error al obtener la información del usuario desde la API:", error);
-      }
 
         // Suscribirse a las notificaciones
         subscribeToNotifications((data) => {
