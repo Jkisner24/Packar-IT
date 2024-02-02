@@ -51,9 +51,15 @@ const useNotifications = (): NotificationsHook => {
         // ... otros eventos y lógica del socket
       });
 
-      socket.on("receive_message ", (data: Message) => {
+      socket.on("receive_message", async (data: Message) => {
+        // Obtener la información de sesión y emitir el evento "session"
+        const session = await getSession();
+        console.log("Session information in receive_message:", session);
+      
         setReceivedMessages((prevMessages) => [...prevMessages, data]);
-        console.log("Mensaje recibido en el cliente:" + data);
+        console.log("Mensaje recibido en el cliente:", data);
+      
+        // Puedes acceder a la información de sesión y mostrarla en la alerta
         alert(`"alert_new_message" received from user with id ${data.userId} with message ${data.userId}: ${data.message}`);
       });
 
