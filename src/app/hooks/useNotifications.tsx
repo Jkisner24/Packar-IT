@@ -54,7 +54,7 @@ const useNotifications = (): NotificationsHook => {
       socket.on("receive_message ", (data: Message) => {
         setReceivedMessages((prevMessages) => [...prevMessages, data]);
         console.log("Mensaje recibido en el cliente:" + data);
-        alert(`Nuevo mensaje recibido de ${data.userId}: ${data.message}`);
+        alert(`"alert_new_message" received from user with id ${data.userId} with message ${data.userId}: ${data.message}`);
       });
 
       socket.on("notification_accepted", ({ notificationId, acceptingUser }) => {
@@ -109,6 +109,8 @@ const useNotifications = (): NotificationsHook => {
 
     // userData ahora contiene la información del usuario
     console.log("Información del usuario desde la API:", userData);
+
+
 
     // Emitir el evento "session" con la información del usuario
     socket.emit("session", { session, userInfo: userData });
