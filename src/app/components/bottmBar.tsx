@@ -20,6 +20,7 @@ const BottmBar = () => {
     acceptNotification,
     cancelNotification,
     handleAcceptNotification,
+    handleSendInformation
   } = useNotifications();
 
   const pathName = usePathname();
@@ -87,7 +88,7 @@ const BottmBar = () => {
           className={`flex ${
             pathName === "/messages" ? "text-pink" : "text-slate-600"
           } flex-col items-center text-xs`}
-          onClick={handleSendMessage}
+          onClick={handleSendInformation}
         >
           <MdOutlineMessage size={30} />
           Mensajess
