@@ -22,7 +22,7 @@ interface NotificationsHook {
   ) => void;
   handleSendMessage: () => void;
   acceptNotification: (notificationId: string) => void;
-  cancelNotification: (notificationId: string) => void;
+
   handleAcceptNotification: (notificationId: any) => void;
   handleSendInformation: (notificationId: any) => void;
 }
@@ -58,9 +58,7 @@ const useNotifications = (): NotificationsHook => {
           const session = await getSession();
 
           if (!session) {
-            console.warn(
-              "No hay sesión disponible. "
-            );
+            console.warn("No hay sesión disponible. ");
             return;
           }
 
@@ -69,10 +67,7 @@ const useNotifications = (): NotificationsHook => {
           // Validar los datos recibidos antes de procesarlos
           const { userId, message } = data;
           if (!userId || !message) {
-            console.error(
-              "Datos recibidos no válidos en ",
-              data
-            );
+            console.error("Datos recibidos no válidos en ", data);
             return;
           }
 
@@ -81,7 +76,9 @@ const useNotifications = (): NotificationsHook => {
 
           console.log("Mensaje recibido en el cliente:", data);
 
-          toast.success(`Mensaje recibido de usuario con ID ${userId}: ${message}`);
+          toast.success(
+            `Mensaje recibido de usuario con ID ${userId}: ${message}`
+          );
           // O utilizar un componente de notificación en lugar de alert
           console.log(
             `Mensaje recibido de usuario con ID ${userId}: ${message}`
@@ -143,37 +140,42 @@ const useNotifications = (): NotificationsHook => {
   const handleSendInformation = async () => {
     try {
       const session = await getSession();
-      console.log("Información del usuario:", session);
+      console.log("User information:", session);
 
       const userMail = session?.user?.email;
 
       if (!userMail) {
-        throw new Error("El eamil no esta habilitado");
+        throw new Error("Email is not enabled");
       }
 
       const userData = await fetch(`/api/auth/myid/?email=${userMail}`).then(
-        (response) => response.json()
+        (response) => {
+          if (!response.ok) {
+            throw new Error("API request failed");
+          }
+          return response.json();
+        }
       );
 
-      console.log("Información del usuario desde la API:", userData);
-      alert(`Hay una notificación de ${JSON.stringify(userData.fullname)}`);
+      console.log("User information from the API:", userData);
+      alert(`There is a notification for ${JSON.stringify(userData.fullname)}`);
 
-      const profileId = userData.userId; 
+      const profileId = userData.userId;
+      const updatedProfile = {
+        $push: {
+          notifications: { message: userData.fullname, timestamp: Date.now() },
+        },
+      };
+      const options = { new: true, upsert: true };
       const profile = await Profile.findByIdAndUpdate(
         profileId,
-        {
-          $push: { notifications: { message: userData.fullname, timestamp: Date.now() } },
-        },
-        { new: true, upsert: true }
+        updatedProfile,
+        options
       );
-
 
       socket.emit("session", { session, userInfo: userData });
     } catch (error) {
-      console.error(
-        "Error al obtener la información del usuario desde la API:",
-        error
-      );
+      console.error("Error getting user information from the API:", error);
     }
   };
 
@@ -223,16 +225,11 @@ const useNotifications = (): NotificationsHook => {
     socket.emit("accept_notification", { notificationId });
   };
 
-  const cancelNotification = (notificationId: string) => {
-    socket.emit("cancel_notification", { notificationId });
-  };
-
   return {
     sendNotification,
     subscribeToNotifications,
     handleSendMessage,
     acceptNotification,
-    cancelNotification,
     handleAcceptNotification,
     handleSendInformation,
   };
