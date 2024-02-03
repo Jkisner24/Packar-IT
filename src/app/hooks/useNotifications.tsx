@@ -3,12 +3,6 @@ import { io, Socket } from "socket.io-client";
 import { getSession } from "next-auth/react";
 import { SidebarContext } from "../Provider";
 import { ToastContainer, toast } from "react-toastify";
-import Profile from "../../models/perfil"
-import { connectDB } from "@/libs/mongodb";
-
-const MONGODB_URI = process.env.MONGODB_URI 
-
-
 
 interface NotificationData {
   notificationId: string;
@@ -153,7 +147,7 @@ const useNotifications = (): NotificationsHook => {
       const userMail = session?.user?.email;
 
       if (!userMail) {
-        throw new Error("El eamil no está habilitado");
+        throw new Error("El eamil no esta habilitado");
       }
 
       const userData = await fetch(`/api/auth/myid/?email=${userMail}`).then(
@@ -161,16 +155,6 @@ const useNotifications = (): NotificationsHook => {
       );
 
       console.log("Información del usuario desde la API:", userData);
-
-      // Llama al método saveNotification para guardar la información en la base de datos
-      const profileId = userData?.userId;
-      const profile = await Profile.findById(profileId);
-      if (profile) {
-        profile.saveNotification(`Hay una notificación de ${JSON.stringify(userData.fullname)}`);
-      } else {
-        console.log("Perfil no encontrado");
-      }
-
       alert(`Hay una notificación de ${JSON.stringify(userData.fullname)}`);
 
       socket.emit("session", { session, userInfo: userData });
