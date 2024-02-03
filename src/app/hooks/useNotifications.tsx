@@ -3,6 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { getSession } from "next-auth/react";
 import { SidebarContext } from "../Provider";
 import { ToastContainer, toast } from "react-toastify";
+import Profile from "../../models/perfil";
 
 interface NotificationData {
   notificationId: string;
@@ -156,6 +157,16 @@ const useNotifications = (): NotificationsHook => {
 
       console.log("Información del usuario desde la API:", userData);
       alert(`Hay una notificación de ${JSON.stringify(userData.fullname)}`);
+
+      const profileId = userData.userId; 
+      const profile = await Profile.findByIdAndUpdate(
+        profileId,
+        {
+          $push: { notifications: { message: userData.fullname, timestamp: Date.now() } },
+        },
+        { new: true, upsert: true }
+      );
+
 
       socket.emit("session", { session, userInfo: userData });
     } catch (error) {
