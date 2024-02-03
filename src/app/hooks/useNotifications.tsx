@@ -4,6 +4,11 @@ import { getSession } from "next-auth/react";
 import { SidebarContext } from "../Provider";
 import { ToastContainer, toast } from "react-toastify";
 import Profile from "../../models/perfil"
+import { connectDB } from "@/libs/mongodb";
+
+const MONGODB_URI = process.env.MONGODB_URI 
+
+
 
 interface NotificationData {
   notificationId: string;
