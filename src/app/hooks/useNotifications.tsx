@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { getSession } from "next-auth/react";
 import { SidebarContext } from "../Provider";
 import { ToastContainer, toast } from "react-toastify";
-import Profile from "../../models/perfil";
+// import Profile from "../../models/perfil";
 
 interface NotificationData {
   notificationId: string;
@@ -58,7 +58,9 @@ const useNotifications = (): NotificationsHook => {
           const session = await getSession();
 
           if (!session) {
-            console.warn("No hay sesión disponible. ");
+            console.warn(
+              "No hay sesión disponible. "
+            );
             return;
           }
 
@@ -67,7 +69,10 @@ const useNotifications = (): NotificationsHook => {
           // Validar los datos recibidos antes de procesarlos
           const { userId, message } = data;
           if (!userId || !message) {
-            console.error("Datos recibidos no válidos en ", data);
+            console.error(
+              "Datos recibidos no válidos en ",
+              data
+            );
             return;
           }
 
@@ -76,9 +81,7 @@ const useNotifications = (): NotificationsHook => {
 
           console.log("Mensaje recibido en el cliente:", data);
 
-          toast.success(
-            `Mensaje recibido de usuario con ID ${userId}: ${message}`
-          );
+          
           // O utilizar un componente de notificación en lugar de alert
           console.log(
             `Mensaje recibido de usuario con ID ${userId}: ${message}`
@@ -137,47 +140,44 @@ const useNotifications = (): NotificationsHook => {
     socket.on("receive_notification", callback);
   };
 
-  const handleSendInformation = async () => {
-    try {
-      const session = await getSession();
-      console.log("User information:", session);
+const handleSendInformation = async () => {
+  try {
+    const session = await getSession();
+    console.log("User information:", session);
 
-      const userMail = session?.user?.email;
+    const userMail = session?.user?.email;
 
-      if (!userMail) {
-        throw new Error("Email is not enabled");
-      }
-
-      const userData = await fetch(`/api/auth/myid/?email=${userMail}`).then(
-        (response) => {
-          if (!response.ok) {
-            throw new Error("API request failed");
-          }
-          return response.json();
-        }
-      );
-
-      console.log("User information from the API:", userData);
-      alert(`There is a notification for ${JSON.stringify(userData.fullname)}`);
-
-      const profileId = userData.userId;
-      const updatedProfile = {
-        $push: {
-          notifications: { message: userData.fullname, timestamp: Date.now() },
-        },
-      };
-      const options = { new: true, upsert: true };
-      const profile = await Profile.findByIdAndUpdate(
-        profileId,
-        updatedProfile,
-        options
-      );
-
-      socket.emit("session", { session, userInfo: userData });
-    } catch (error) {
-      console.error("Error getting user information from the API:", error);
+    if (!userMail) {
+      throw new Error("Email is not enabled");
     }
-  };
+
+    const userData = await fetch(`/api/auth/myid/?email=${userMail}`).then(
+      (response) => {
+        if (!response.ok) {
+          throw new Error("API request failed");
+        }
+        return response.json();
+      }
+    );
+
+    console.log("User information from the API:", userData);
+    alert(`There is a notification for ${JSON.stringify(userData.fullname)}`);
+
+    //const profileId = userData.userId; 
+    //const updatedProfile = {
+    //  $push: { notifications: { message: userData.fullname, timestamp: Date.now() } },
+    //};
+    //const options = { new: true, upsert: true };
+    // const profile = await Profile.findByIdAndUpdate(profileId, updatedProfile, options);
+
+    socket.emit("session", { session, userInfo: userData });
+  } catch (error) {
+    console.error(
+      "Error getting user information from the API:",
+      error
+    );
+  }
+};
 
   const handleSendMessage = async () => {
     try {
@@ -224,6 +224,7 @@ const useNotifications = (): NotificationsHook => {
   const acceptNotification = (notificationId: string) => {
     socket.emit("accept_notification", { notificationId });
   };
+
 
   return {
     sendNotification,
