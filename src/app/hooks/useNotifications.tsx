@@ -3,7 +3,6 @@ import { io, Socket } from "socket.io-client";
 import { getSession } from "next-auth/react";
 import { SidebarContext } from "../Provider";
 
-
 interface NotificationData {
   notificationId: string;
   notification: string;
@@ -21,7 +20,7 @@ interface NotificationsHook {
   ) => void;
   handleSendMessage: () => void;
   acceptNotification: (notificationId: string) => void;
-  cancelNotification: (notificationId: string) => void;
+
   handleAcceptNotification: (notificationId: any) => void;
   handleSendInformation: (notificationId: any) => void;
 }
@@ -31,14 +30,15 @@ const useNotifications = (): NotificationsHook => {
   const socket: Socket = io(socketServerUrl);
 
   const [receivedMessages, setReceivedMessages] = useState<Message[]>([]);
-  const [receivedNotifications, setReceivedNotifications] = useState<NotificationData[]>([]);
+  const [receivedNotifications, setReceivedNotifications] = useState<
+    NotificationData[]
+  >([]);
 
   useEffect(() => {
     const initializeSocket = async () => {
       // Manejar el evento de conexión
       socket.on("connect", async () => {
         console.log("Conectado al servidor de sockets");
-
 
         // Suscribirse a las notificaciones
         subscribeToNotifications((data) => {
@@ -51,19 +51,56 @@ const useNotifications = (): NotificationsHook => {
         // ... otros eventos y lógica del socket
       });
 
-      socket.on("receive_message", (data: Message) => {
-        setReceivedMessages((prevMessages) => [...prevMessages, data]);
-        console.log("Mensaje recibido en el cliente:" + data);
-        alert(`Nuevo mensaje recibido de ${data.userId}: ${data.message}`);
+      socket.on("receive_message", async (data: Message) => {
+        try {
+          const session = await getSession();
+
+          if (!session) {
+            console.warn("No hay sesión disponible. ");
+            return;
+          }
+
+          console.log("Información:", session);
+
+          // Validar los datos recibidos antes de procesarlos
+          const { userId, message } = data;
+          if (!userId || !message) {
+            console.error("Datos recibidos no válidos en ", data);
+            return;
+          }
+
+          // Actualizar el estado de manera segura
+          setReceivedMessages((prevMessages) => [...prevMessages, data]);
+
+          console.log("Mensaje recibido en el cliente:", data);
+
+          // O utilizar un componente de notificación en lugar de alert
+          console.log(
+            `Mensaje recibido de usuario con ID ${userId}: ${message}`
+          );
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            console.error("Error en receive_message:", error.message);
+            // Puedes manejar diferentes tipos de errores aquí
+          } else {
+            console.error("Error inesperado en receive_message:", error);
+          }
+        }
       });
 
-      socket.on("notification_accepted", ({ notificationId, acceptingUser }) => {
-        // Aquí puedes actualizar el estado del cliente según la notificación aceptada
-        console.log(`Notificación ${notificationId} aceptada por:`, acceptingUser);
-        
-        // Puedes realizar la lógica que necesites para actualizar el estado del cliente
-        // Por ejemplo, podrías marcar la notificación como aceptada en tu estado local
-      });
+      socket.on(
+        "notification_accepted",
+        ({ notificationId, acceptingUser }) => {
+          // Aquí puedes actualizar el estado del cliente según la notificación aceptada
+          console.log(
+            `Notificación ${notificationId} aceptada por:`,
+            acceptingUser
+          );
+
+          // Puedes realizar la lógica que necesites para actualizar el estado del cliente
+          // Por ejemplo, podrías marcar la notificación como aceptada en tu estado local
+        }
+      );
 
       socket.on("notification_canceled", (data: NotificationData) => {
         console.log(
@@ -96,26 +133,32 @@ const useNotifications = (): NotificationsHook => {
   };
 
   const handleSendInformation = async () => {
-        // Obtener la información de sesión y emitir el evento "session"
-  const session = await getSession();
-  console.log("Sending session information:", session);
+    try {
+      const session = await getSession();
+      console.log("Información del usuario:", session);
 
-  const userMail = session?.user?.email;
+      const userMail = session?.user?.email;
 
-  // Hacer una solicitud a tu API para obtener la información del usuario
-  try {
-    const response = await fetch(`/api/auth/myid/?email=${userMail}`);
-    const userData = await response.json();
+      if (!userMail) {
+        throw new Error("Error al obtener la información del usuario");
+      }
 
-    // userData ahora contiene la información del usuario
-    console.log("Información del usuario desde la API:", userData);
+      const userData = await fetch(`/api/auth/myid/?email=${userMail}`).then(
+        (response) => {
+          if (!response.ok) {
+            throw new Error("API request failed");
+          }
+          return response.json();
+        }
+      );
 
-    // Emitir el evento "session" con la información del usuario
-    socket.emit("session", { session, userInfo: userData });
+      console.log("Información de la Api :", userData);
+      alert(`Hay una notificación de  ${JSON.stringify(userData.fullname)}`);
 
-  } catch (error) {
-    console.error("Error al obtener la información del usuario desde la API:", error);
-  }
+      socket.emit("session", { session, userInfo: userData });
+    } catch (error) {
+      console.error("Error al obtener la información del usuario:", error);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -164,19 +207,16 @@ const useNotifications = (): NotificationsHook => {
     socket.emit("accept_notification", { notificationId });
   };
 
-  const cancelNotification = (notificationId: string) => {
-    socket.emit("cancel_notification", { notificationId });
-  };
-
   return {
     sendNotification,
     subscribeToNotifications,
     handleSendMessage,
     acceptNotification,
-    cancelNotification,
     handleAcceptNotification,
-    handleSendInformation
+    handleSendInformation,
   };
 };
 
 export default useNotifications;
+
+
