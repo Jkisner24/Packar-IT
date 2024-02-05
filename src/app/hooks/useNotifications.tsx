@@ -132,34 +132,30 @@ const useNotifications = (): NotificationsHook => {
     socket.on("receive_notification", callback);
   };
 
-  const handleSendInformation = async () => {
-    try {
-      const session = await getSession();
-      console.log("Información del usuario:", session);
+const handleSendInformation = async () => {
+  try {
+    const session = await getSession();
+    console.log("Información del usuario:", session);
 
-      const userMail = session?.user?.email;
+    const userMail = session?.user?.email;
 
-      if (!userMail) {
-        throw new Error("Error al obtener la información del usuario");
-      }
-
-      const userData = await fetch(`/api/auth/myid/?email=${userMail}`).then(
-        (response) => {
-          if (!response.ok) {
-            throw new Error("API request failed");
-          }
-          return response.json();
-        }
-      );
-
-      console.log("Información de la Api :", userData);
-      alert(`Hay una notificación de  ${JSON.stringify(userData.fullname)}`);
-
-      socket.emit("session", { session, userInfo: userData });
-    } catch (error) {
-      console.error("Error al obtener la información del usuario:", error);
+    if (!userMail) {
+      throw new Error("Error al obtener la información del usuario");
     }
-  };
+
+    const response = await fetch(`/api/auth/myid/?email=${userMail}`);
+    if (!response.ok) {
+      throw new Error("API request failed");
+    }
+    const userData = await response.json();
+
+    console.log("Información de la Api :", userData);
+    alert(`Hay una notificación de  ${JSON.stringify(userData.fullname)}`);
+    socket.emit("session", { session, userInfo: userData });
+  } catch (error) {
+    console.error("Error al obtener la información del usuario:", error);
+  }
+};
 
   const handleSendMessage = async () => {
     try {
