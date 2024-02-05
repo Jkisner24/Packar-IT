@@ -143,12 +143,12 @@ const useNotifications = (): NotificationsHook => {
 const handleSendInformation = async () => {
   try {
     const session = await getSession();
-    console.log("User information:", session);
+    console.log("Información del usuario:", session);
 
     const userMail = session?.user?.email;
 
     if (!userMail) {
-      throw new Error("Email is not enabled");
+      throw new Error("Error al obtener la información del usuario");
     }
 
     const userData = await fetch(`/api/auth/myid/?email=${userMail}`).then(
@@ -160,8 +160,8 @@ const handleSendInformation = async () => {
       }
     );
 
-    console.log("User information from the API:", userData);
-    alert(`There is a notification for ${JSON.stringify(userData.fullname)}`);
+    console.log("Información de la Api :", userData);
+    alert(`Hay una notificación de  ${JSON.stringify(userData.fullname)}`);
 
     //const profileId = userData.userId; 
     //const updatedProfile = {
@@ -173,7 +173,7 @@ const handleSendInformation = async () => {
     socket.emit("session", { session, userInfo: userData });
   } catch (error) {
     console.error(
-      "Error getting user information from the API:",
+      "Error al obtener la información del usuario:",
       error
     );
   }
