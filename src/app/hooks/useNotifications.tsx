@@ -110,7 +110,7 @@ const useNotifications = (): NotificationsHook => {
 
         socket.on("alert_new_message", (data: any) => {
           console.log("Mostrar alerta:", data);
-          alert(data.message);
+          
         });
       });
     };
