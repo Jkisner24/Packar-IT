@@ -2,8 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { getSession } from "next-auth/react";
 import { SidebarContext } from "../Provider";
-//import { ToastContainer, toast } from "react-toastify";
-// import Profile from "../../models/perfil";
 
 interface NotificationData {
   notificationId: string;
@@ -58,9 +56,7 @@ const useNotifications = (): NotificationsHook => {
           const session = await getSession();
 
           if (!session) {
-            console.warn(
-              "No hay sesión disponible. "
-            );
+            console.warn("No hay sesión disponible. ");
             return;
           }
 
@@ -69,10 +65,7 @@ const useNotifications = (): NotificationsHook => {
           // Validar los datos recibidos antes de procesarlos
           const { userId, message } = data;
           if (!userId || !message) {
-            console.error(
-              "Datos recibidos no válidos en ",
-              data
-            );
+            console.error("Datos recibidos no válidos en ", data);
             return;
           }
 
@@ -81,7 +74,6 @@ const useNotifications = (): NotificationsHook => {
 
           console.log("Mensaje recibido en el cliente:", data);
 
-          
           // O utilizar un componente de notificación en lugar de alert
           console.log(
             `Mensaje recibido de usuario con ID ${userId}: ${message}`
@@ -140,44 +132,34 @@ const useNotifications = (): NotificationsHook => {
     socket.on("receive_notification", callback);
   };
 
-const handleSendInformation = async () => {
-  try {
-    const session = await getSession();
-    console.log("Información del usuario:", session);
+  const handleSendInformation = async () => {
+    try {
+      const session = await getSession();
+      console.log("Información del usuario:", session);
 
-    const userMail = session?.user?.email;
+      const userMail = session?.user?.email;
 
-    if (!userMail) {
-      throw new Error("Error al obtener la información del usuario");
-    }
-
-    const userData = await fetch(`/api/auth/myid/?email=${userMail}`).then(
-      (response) => {
-        if (!response.ok) {
-          throw new Error("API request failed");
-        }
-        return response.json();
+      if (!userMail) {
+        throw new Error("Error al obtener la información del usuario");
       }
-    );
 
-    console.log("Información de la Api :", userData);
-    alert(`Hay una notificación de  ${JSON.stringify(userData.fullname)}`);
+      const userData = await fetch(`/api/auth/myid/?email=${userMail}`).then(
+        (response) => {
+          if (!response.ok) {
+            throw new Error("API request failed");
+          }
+          return response.json();
+        }
+      );
 
-    //const profileId = userData.userId; 
-    //const updatedProfile = {
-    //  $push: { notifications: { message: userData.fullname, timestamp: Date.now() } },
-    //};
-    //const options = { new: true, upsert: true };
-    // const profile = await Profile.findByIdAndUpdate(profileId, updatedProfile, options);
+      console.log("Información de la Api :", userData);
+      alert(`Hay una notificación de  ${JSON.stringify(userData.fullname)}`);
 
-    socket.emit("session", { session, userInfo: userData });
-  } catch (error) {
-    console.error(
-      "Error al obtener la información del usuario:",
-      error
-    );
-  }
-};
+      socket.emit("session", { session, userInfo: userData });
+    } catch (error) {
+      console.error("Error al obtener la información del usuario:", error);
+    }
+  };
 
   const handleSendMessage = async () => {
     try {
@@ -224,7 +206,6 @@ const handleSendInformation = async () => {
   const acceptNotification = (notificationId: string) => {
     socket.emit("accept_notification", { notificationId });
   };
-
 
   return {
     sendNotification,
