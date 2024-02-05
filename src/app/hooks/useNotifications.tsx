@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { getSession } from "next-auth/react";
 import { SidebarContext } from "../Provider";
-import { ToastContainer, toast } from "react-toastify";
+//import { ToastContainer, toast } from "react-toastify";
 // import Profile from "../../models/perfil";
 
 interface NotificationData {
