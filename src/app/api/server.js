@@ -37,7 +37,9 @@ const io = new Server(httpServer, {
 
 io.on("connection", async (socket) => {
   console.log(
-    `A user connected: ${socket.userInfo ? socket.userInfo.email : "Guest"} - ${socket.id}`
+    `A user connected: ${socket.userInfo ? socket.userInfo.email : "Guest"} - ${
+      socket.id
+    }`
   );
 
   // Accede a la información del usuario proporcionada al conectarse.
@@ -54,11 +56,15 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("send_message", (data) => {
-    console.log("Mensaje recibido:", data);
-    socket.broadcast.emit("receive_message", data);
-    socket.broadcast.emit("alert_new_message", {
-      message: "Nuevo mensaje de !",
-    });
+    if (typeof data === "string" && data.length > 0 && data.length <= 255) {
+      console.log("Mensaje recibido:", data);
+      socket.broadcast.emit("receive_message", data);
+      socket.broadcast.emit("alert_new_message", {
+        message: "Nuevo mensaje de !",
+      });
+    } else {
+      console.error("Datos no válidos recibidos");
+    }
   });
 
   socket.on(
