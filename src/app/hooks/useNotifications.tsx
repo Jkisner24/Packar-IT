@@ -148,7 +148,6 @@ const handleSendInformation = async () => {
       throw new Error("API request failed");
     }
     const userData = await response.json();
-
     console.log("Información de la Api :", userData);
     alert(`Hay una notificación de  ${JSON.stringify(userData.fullname)}`);
     socket.emit("session", { session, userInfo: userData });
